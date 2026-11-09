@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Đổi màu mô hình 3D</title>
+<meta name="theme-color" content="#06060c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#06060c;--panel:#0b0b16;--panel2:#10101f;--ink:#d8f3ff;--mute:#7b88a8;--line:#1d2a44;--cy:#00f0ff;--mg:#ff2bd6;--yl:#fcee09;--acc:#00f0ff;--accink:#001418;--chk:#1a1a30;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 "Chakra Petch",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+/* lưới + scanline chỉ nằm ở nền phía sau; khung ảnh và bảng điều khiển có nền đặc nên màu ảnh không bị ám */
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(900px 480px at 6% -8%,#ff2bd626,transparent 62%),radial-gradient(900px 560px at 100% 108%,#00f0ff22,transparent 62%),linear-gradient(#00f0ff0f 1px,transparent 1px) 0 0/44px 44px,linear-gradient(90deg,#00f0ff0f 1px,transparent 1px) 0 0/44px 44px}
+body::after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:repeating-linear-gradient(0deg,#0000 0 2px,#00000038 2px 3px)}
+.app{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:18px;padding:18px;max-width:1340px;margin:0 auto}
+@media(max-width:860px){.app{grid-template-columns:minmax(0,1fr);padding:12px}}
+.top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+h1{display:inline-block;font-size:24px;font-weight:700;letter-spacing:.06em;margin:0;text-transform:uppercase;color:var(--ink);text-shadow:2px 0 #ff2bd6aa,-2px 0 #00f0ffaa;animation:gl 6s infinite}
+.ver{font:500 12px "JetBrains Mono",ui-monospace,monospace;color:var(--mg)}
+@keyframes gl{0%,93%,100%{transform:none}94%{transform:translate(3px,-1px) skewX(-8deg)}96%{transform:translate(-3px,1px)}98%{transform:none}}
+.sub{color:var(--mute);margin:2px 0 14px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+button{font:600 13px/1 "Chakra Petch",system-ui,sans-serif;letter-spacing:.04em;color:var(--cy);background:#00f0ff0f;border:1px solid #00f0ff77;padding:10px 14px;cursor:pointer;transition:background .15s,box-shadow .15s,color .15s}
+button:hover{background:#00f0ff24;box-shadow:0 0 14px #00f0ff66}
+button:focus-visible,input:focus-visible{outline:2px solid var(--yl);outline-offset:2px}
+button.pri{background:var(--yl);color:#14130a;border-color:var(--yl)}
+button.pri:hover{background:#fff35c;box-shadow:0 0 18px #fcee0999}
+button.on{color:var(--mg);border-color:var(--mg);background:#ff2bd61c;box-shadow:0 0 14px #ff2bd655,inset 0 0 10px #ff2bd633}
+button svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.grp{padding:1px;background:linear-gradient(135deg,var(--cy),#00f0ff44 55%,var(--mg));clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.grp .in{display:flex;background:var(--panel2);clip-path:polygon(9.5px 0,100% 0,100% calc(100% - 9.5px),calc(100% - 9.5px) 100%,0 100%,0 9.5px)}
+.grp button{display:inline-flex;align-items:center;gap:8px;padding:11px 16px;background:transparent;border:0;border-right:1px solid #00f0ff30;color:var(--ink);box-shadow:none}
+.grp button:last-child{border-right:0}
+.grp button svg{color:var(--cy)}
+.grp button:hover{background:#00f0ff1f;box-shadow:none}
+.grp button:active{background:#00f0ff38}
+.grp button.on{background:#ff2bd626;color:var(--mg);box-shadow:inset 0 -2px 0 var(--mg)}
+.grp button.on svg{color:var(--mg)}
+.grp button:focus-visible,.hero button:focus-visible{outline:2px solid var(--yl);outline-offset:-4px}
+.hero{margin-left:auto;filter:drop-shadow(0 0 10px #fcee0966)}
+.hero button{display:inline-flex;align-items:center;gap:10px;padding:13px 24px;font-size:14px;font-weight:700;background:var(--yl);color:#14130a;border:0;box-shadow:none;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px)}
+.hero button:hover{background:#fff35c;box-shadow:none}
+.hero svg{width:18px;height:18px}
+@media(max-width:600px){.hero{margin-left:0;width:100%}.hero button{width:100%;justify-content:center}}
+.stage,.panel{position:relative;background:var(--panel);border:1px solid var(--line)}
+.stage::before,.panel::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;background:linear-gradient(var(--cy),var(--cy)) top left/18px 2px no-repeat,linear-gradient(var(--cy),var(--cy)) top left/2px 18px no-repeat,linear-gradient(var(--mg),var(--mg)) bottom right/18px 2px no-repeat,linear-gradient(var(--mg),var(--mg)) bottom right/2px 18px no-repeat}
+.stage{display:flex;justify-content:center;align-items:center;min-height:320px;padding:14px;overflow:auto;box-shadow:0 0 30px #00f0ff14}
+canvas{max-width:100%;height:auto;background:repeating-conic-gradient(var(--chk) 0 25%,transparent 0 50%) 0 0/16px 16px;outline:1px solid #00f0ff44}
+canvas.pick{cursor:crosshair}
+.wrap{position:relative;display:inline-block;line-height:0;max-width:100%}
+.wrap[hidden]{display:none}
+#ov{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;background:none;outline:none}
+.drop{text-align:center;color:var(--mute);padding:36px 20px;border:1px dashed #00f0ff44;width:100%;max-width:520px}
+.drop::before{content:"Chưa có ảnh";display:block;color:var(--mg);font-weight:700;font-size:16px;letter-spacing:.06em;margin-bottom:8px}
+.hint{min-height:22px;color:var(--cy);font:500 13px "JetBrains Mono",ui-monospace,monospace;margin:10px 2px 0}
+.hint::before{content:"> "}
+.hint:empty::before{content:"> sẵn sàng";color:var(--mute)}
+.hint:not(:empty)::after{content:"_";animation:bl 1s steps(2) infinite}
+@keyframes bl{50%{opacity:0}}
+.panel{align-self:start}
+.pin{padding:14px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#00f0ff66 transparent}
+.panel h2{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--ink);margin:0 0 8px}
+.panel h2::before{content:"//";color:var(--mg);font-family:"JetBrains Mono",ui-monospace,monospace}
+.panel h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,#ff2bd677,transparent)}
+.chip{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--line);border-left:3px solid #00f0ff66;background:var(--panel2);margin-bottom:6px;cursor:pointer}
+.chip.on{border-color:var(--mg);box-shadow:0 0 14px #ff2bd638,inset 0 0 14px #ff2bd616}
+.chip .nm{flex:1;font-weight:600}
+.chip .mute{color:var(--cy)}
+.chip button{padding:1px 7px;font-size:12px}
+.chip input{accent-color:var(--cy)}
+.sw{display:inline-block;width:22px;height:22px;border-radius:2px;border:1px solid #ffffff55}
+.mute{color:var(--mute)}
+.row{display:flex;align-items:center;gap:8px;margin:8px 0}
+.row input[type=color]{width:42px;height:34px;padding:0;border:1px solid #00f0ff77;background:none}
+.row input[type=text]{width:96px;font:500 13px "JetBrains Mono",ui-monospace,monospace;padding:7px 8px;border:1px solid var(--line);background:#05050c;color:var(--cy)}
+.sl{margin:11px 0}
+.sl label{display:flex;justify-content:space-between;font-size:13px;color:var(--mute);margin-bottom:4px}
+.sl b{font:500 13px "JetBrains Mono",ui-monospace,monospace;color:var(--yl)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;background:var(--line);outline:none;border:1px solid #00f0ff55}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:22px;background:var(--cy);border:none;box-shadow:0 0 10px var(--cy)}
+input[type=range]::-moz-range-thumb{width:10px;height:22px;border-radius:0;background:var(--cy);border:none;box-shadow:0 0 10px var(--cy)}
+.ramp{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin-top:6px}
+.ramp span{height:30px;border:1px solid #ffffff2a;cursor:pointer}
+.ramp span:hover,.ps:hover{outline:1px solid var(--cy)}
+.pal{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:6px 0 4px}
+.ps{position:relative;aspect-ratio:1;border-radius:2px;border:1px solid #ffffff33;cursor:pointer}
+.ps.cur{outline:2px solid var(--yl);outline-offset:2px;box-shadow:0 0 12px #fcee0988}
+.ps b{position:absolute;top:-7px;right:-7px;width:16px;height:16px;background:#05050c;border:1px solid #ff2bd699;font-size:11px;line-height:14px;text-align:center;color:var(--mg);font-weight:400}
+.modal{position:fixed;inset:0;background:#000d;display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;padding:16px;z-index:5}
+.modal.show{display:flex}
+.modal img{max-width:100%;max-height:78vh;border:1px solid var(--cy);box-shadow:0 0 30px #00f0ff44}
+.modal p{color:var(--cy);margin:0;text-align:center}
+.clean .panel,.clean .sub,.clean .hint{display:none}
+.clean .app{grid-template-columns:minmax(0,1fr)}
+.clean #g2,.clean #g3,.clean #bUp{display:none}
+.clean .hero{filter:drop-shadow(0 0 10px #ff2bd699)}
+.clean .hero button{background:var(--mg);color:#fff}
+@media(min-width:861px){
+ main{position:sticky;top:18px;align-self:start}
+ .panel{position:sticky;top:18px;max-height:calc(100vh - 36px);max-height:calc(100dvh - 36px);display:flex;flex-direction:column}
+ .pin{min-height:0}
+ canvas#cv{max-height:max(240px,calc(100vh - 280px));max-height:max(240px,calc(100dvh - 280px))}
+}
+@media(prefers-reduced-motion:reduce){h1,.hint::after{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+ <main>
+  <div class="top"><h1>Đổi màu mô hình 3D</h1><span class="ver">chroma.shift // v2</span></div>
+  <p class="sub">Tải ảnh mô hình, bấm vào phần cần đổi, rồi chỉnh màu để xem trước khi in.</p>
+  <div class="bar">
+   <div class="grp"><div class="in"><button id="bUp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg><span>Tải ảnh lên</span></button><button id="bSave"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg><span>Lưu ảnh</span></button></div></div>
+   <div class="grp" id="g2"><div class="in"><button id="bAdd"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span>Thêm vùng màu</span></button><button id="bMask"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" stroke-dasharray="3 3"/></svg><span>Xem vùng chọn</span></button></div></div>
+   <div class="grp" id="g3"><div class="in"><button id="bHold" title="Giữ chuột/ngón tay để xem ảnh gốc"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14"/><path d="M12 5v14"/></svg><span>Giữ để xem ảnh gốc</span></button></div></div>
+   <div class="hero"><button id="bResult" class="pri"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span class="lbl">Xem kết quả</span></button></div>
+   <input type="file" id="file" accept="image/*" hidden>
+  </div>
+  <div class="stage" id="stage">
+   <div class="drop" id="drop">Kéo thả, dán (Ctrl+V) hoặc bấm “Tải ảnh lên” để bắt đầu.</div>
+   <div class="wrap" id="wrap" hidden><canvas id="cv"></canvas><canvas id="ov"></canvas></div>
+  </div>
+  <div class="hint" id="hint"></div>
+ </main>
+ <aside class="panel"><div class="pin">
+  <h2>Các vùng màu</h2>
+  <div id="list"></div>
+  <div id="ctl" hidden>
+   <h2 style="margin-top:14px">Màu mới</h2>
+   <div class="row"><span class="sw" id="srcSw" title="Màu gốc"></span><span class="mute">→</span><input type="color" id="tc"><input type="text" id="hex" maxlength="7" spellcheck="false"><button id="bRe">Chọn lại</button></div>
+   <h2>Bảng màu filament</h2>
+   <div class="pal" id="pal"></div>
+   <div class="row"><input type="color" id="pc" value="#ff8800"><button id="pAdd">+ Thêm vào bảng màu</button></div>
+   <div class="sl"><label><span>Hue (sắc màu)</span><b id="vH"></b></label><input type="range" id="sH" min="0" max="360" step="1"></div>
+   <div class="sl"><label><span>Saturation (độ đậm)</span><b id="vS"></b></label><input type="range" id="sS" min="0" max="100" step="1"></div>
+   <div class="sl"><label><span>Lightness (độ sáng)</span><b id="vL"></b></label><input type="range" id="sL" min="0" max="100" step="1"></div>
+   <div class="sl"><label><span>Exposure (phơi sáng)</span><b id="vE"></b></label><input type="range" id="sE" min="-100" max="100" step="1"></div>
+   <div class="sl"><label><span>Dung sai vùng chọn</span><b id="vT"></b></label><input type="range" id="sT" min="1" max="100" step="1"></div>
+   <div class="row" style="flex-wrap:wrap"><button id="bAll" title="Giống Select Similar trong Photoshop">Chọn tất cả vùng cùng màu</button><button id="bPiece">+ Thêm mảnh</button></div>
+   <h2>Các sắc độ của màu này</h2>
+   <div class="ramp" id="ramp"></div>
+  </div>
+  <p class="mute" style="font-size:13px;margin:14px 0 0">Mẹo: viền nét đứt là vùng đang chọn (mặc định chỉ gồm các mảnh liền nhau). Bấm “Chọn tất cả vùng cùng màu” để chọn mọi chỗ có màu giống, hoặc giữ Shift và bấm để thêm mảnh khác. Bật “Xem vùng chọn” và chỉnh Dung sai cho vừa đúng bộ phận cần đổi.</p>
+ </div></aside>
+</div>
+<div class="modal" id="modal"><img id="outImg" alt="Ảnh kết quả"><p>Nhấn giữ (điện thoại) hoặc chuột phải (máy tính) lên ảnh để lưu. Bấm ra ngoài để đóng.</p></div>
+<script>
+const $=s=>document.querySelector(s);
+// Bảng màu filament: thay danh sách này bằng màu filament thật của bạn (n = tên, c = mã HEX)
+const PALETTE=[{n:'Trắng',c:'#f4f4f2'},{n:'Đen',c:'#1c1c1c'},{n:'Xám',c:'#8d8d8d'},{n:'Đỏ',c:'#d32f2f'},{n:'Cam',c:'#f57c00'},{n:'Vàng',c:'#fbc02d'},{n:'Xanh lá',c:'#388e3c'},{n:'Xanh dương',c:'#1976d2'},{n:'Tím',c:'#7b1fa2'},{n:'Hồng',c:'#ec407a'},{n:'Nâu',c:'#6d4c41'},{n:'Màu da',c:'#f1c9a5'}];
+let PAL=PALETTE.map(x=>({...x}));
+const cv=$('#cv'),ctx=cv.getContext('2d',{willReadFrequently:true});
+let orig=null,outImg=null,W=0,H=0,hh,ss,ll,cx,cy,cz,layers=[],sel=-1,hold=false,showMask=false,pickMode=null,raf=0;
+const ov=$('#ov'),octx=ov.getContext('2d');let ovImg=null,u32=null,ex=[],ey=[],phase=0,outlineDirty=true,drawn=false,clean=false;
+let HH=0,SS=0,LL=0,R=0,G=0,B=0;
+function rgb2hsl(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;LL=(mx+mn)/2;SS=d===0?0:d/(1-Math.abs(2*LL-1));let h=0;if(d){if(mx===r)h=((g-b)/d)%6;else if(mx===g)h=(b-r)/d+2;else h=(r-g)/d+4;h*=60;if(h<0)h+=360}HH=h}
+function hsl2rgb(h,s,l){const c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs((h/60)%2-1)),m=l-c/2;let r=0,g=0,b=0;
+ if(h<60){r=c;g=x}else if(h<120){r=x;g=c}else if(h<180){g=c;b=x}else if(h<240){g=x;b=c}else if(h<300){r=x;b=c}else{r=c;b=x}
+ R=(r+m)*255;G=(g+m)*255;B=(b+m)*255}
+const hex=(r,g,b)=>'#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
+const tgtHex=t=>{hsl2rgb(t.h,t.s,t.l);return hex(R,G,B)};
+const css=t=>`hsl(${t.h} ${t.s*100}% ${t.l*100}%)`;
+function coneOf(r,g,b,h){const mx=Math.max(r,g,b)/255,mn=Math.min(r,g,b)/255,sv=mx?(mx-mn)/mx:0,a=h*Math.PI/180;return[mx*sv*Math.cos(a),mx*sv*Math.sin(a),mx]}
+
+function loadImg(src){const im=new Image();im.onload=()=>{
+ const k=Math.min(1,1400/Math.max(im.width,im.height));W=Math.round(im.width*k);H=Math.round(im.height*k);
+ cv.width=W;cv.height=H;ctx.clearRect(0,0,W,H);ctx.drawImage(im,0,0,W,H);
+ orig=ctx.getImageData(0,0,W,H);outImg=ctx.createImageData(W,H);ov.width=W;ov.height=H;ovImg=octx.createImageData(W,H);u32=new Uint32Array(ovImg.data.buffer);ex=[];ey=[];drawn=false;
+ const n=W*H;hh=new Float32Array(n);ss=new Float32Array(n);ll=new Float32Array(n);cx=new Float32Array(n);cy=new Float32Array(n);cz=new Float32Array(n);
+ const o=orig.data;
+ for(let i=0,j=0;i<n;i++,j+=4){rgb2hsl(o[j],o[j+1],o[j+2]);hh[i]=HH;ss[i]=SS;ll[i]=LL;const c=coneOf(o[j],o[j+1],o[j+2],HH);cx[i]=c[0];cy[i]=c[1];cz[i]=c[2]}
+ layers=[];sel=-1;outlineDirty=true;$('#drop').hidden=true;$('#wrap').hidden=false;setPick('new');sync();req()};
+ im.src=src}
+function readFile(f){if(!f||!f.type.startsWith('image/'))return;const r=new FileReader();r.onload=()=>loadImg(r.result);r.readAsDataURL(f)}
+
+function setPick(m){pickMode=m;cv.classList.toggle('pick',!!m);$('#bAdd').classList.toggle('on',m==='new');$('#bPiece').classList.toggle('on',m==='add');$('#hint').textContent=m?(m==='re'?'Bấm lên ảnh để chọn lại màu nguồn của vùng này':m==='add'?'Bấm lên mảnh khác để thêm vào vùng đang chọn':'Bấm lên ảnh vào phần có màu cần đổi'):''}
+cv.addEventListener('click',e=>{
+ if(!orig)return;const mode=pickMode||(e.shiftKey&&sel>=0?'add':null);if(!mode)return;
+ const rc=cv.getBoundingClientRect(),px=Math.floor((e.clientX-rc.left)*W/rc.width),py=Math.floor((e.clientY-rc.top)*H/rc.height);
+ let r=0,g=0,b=0,c=0;
+ for(let y=py-2;y<=py+2;y++)for(let x=px-2;x<=px+2;x++){if(x<0||y<0||x>=W||y>=H)continue;const j=(y*W+x)*4;r+=orig.data[j];g+=orig.data[j+1];b+=orig.data[j+2];c++}
+ r/=c;g/=c;b/=c;rgb2hsl(r,g,b);
+ const src={h:HH,s:SS,l:LL,r,g,b},seed=Math.min(H-1,Math.max(0,py))*W+Math.min(W-1,Math.max(0,px));
+ if(mode==='add'&&sel>=0){layers[sel].seeds.push(seed)}
+ else if(mode==='re'&&sel>=0){layers[sel].src=src;layers[sel].seeds=[seed]}
+ else{layers.push({src,tgt:{h:HH,s:SS,l:LL},exp:0,tol:30,on:true,all:false,seeds:[seed],mask:null,dirty:true});sel=layers.length-1}
+ layers[sel].dirty=true;outlineDirty=true;setPick(null);sync();req()});
+
+function params(l){const s=l.src,t=l.tgt;const c=coneOf(s.r,s.g,s.b,s.h);
+ return{x:c[0],y:c[1],z:c[2],t:l.tol/100*.9,col:s.s>.08,dh:t.h-s.h,sr:s.s>.08?t.s/s.s:1,th:t.h,ts:t.s,dl:t.l-s.l,sl:s.l,m:Math.pow(2,l.exp/50),all:l.all,mask:l.mask}}
+function draw(){
+ if(!orig)return;prep();
+ if(hold){ctx.putImageData(orig,0,0);return}
+ const n=W*H,o=orig.data,out=outImg.data;
+ if(showMask&&!clean&&sel>=0){const p=params(layers[sel]);
+  for(let i=0,j=0;i<n;i++,j+=4){const dx=cx[i]-p.x,dy=cy[i]-p.y,dz=(cz[i]-p.z)*.6,d=Math.sqrt(dx*dx+dy*dy+dz*dz);
+   let w=0;if(d<p.t){const u=(p.t-d)/(p.t*.5);w=d<=p.t*.5?1:u*u*(3-2*u)}if(!p.all)w*=p.mask[i];
+   const dim=(o[j]*.3+o[j+1]*.59+o[j+2]*.11)*.25;
+   out[j]=dim*(1-w)+255*w;out[j+1]=dim*(1-w)+90*w;out[j+2]=dim*(1-w)+160*w;out[j+3]=255}
+  ctx.putImageData(outImg,0,0);return}
+ const P=layers.filter(l=>l.on).map(params);
+ for(let i=0,j=0;i<n;i++,j+=4){
+  let cr=o[j],cg=o[j+1],cb=o[j+2];
+  for(let k=0;k<P.length;k++){const p=P[k];
+   const dx=cx[i]-p.x,dy=cy[i]-p.y,dz=(cz[i]-p.z)*.6,d=Math.sqrt(dx*dx+dy*dy+dz*dz);
+   if(d>=p.t||(!p.all&&!p.mask[i]))continue;
+   const u=(p.t-d)/(p.t*.5),w=d<=p.t*.5?1:u*u*(3-2*u);
+   const h=hh[i],s=ss[i],l=ll[i];
+   const h2=p.col?(h+p.dh+720)%360:p.th,s2=p.col?Math.min(1,s*p.sr):p.ts;
+   const l2=p.dl>=0?l+(1-l)*Math.min(1,p.dl/(1-p.sl+.02)):l*(1-Math.min(1,-p.dl/(p.sl+.02)));
+   hsl2rgb(h2,s2,l2);
+   const tr=Math.min(255,R*p.m),tg=Math.min(255,G*p.m),tb=Math.min(255,B*p.m);
+   cr+=(tr-cr)*w;cg+=(tg-cg)*w;cb+=(tb-cb)*w}
+  out[j]=cr;out[j+1]=cg;out[j+2]=cb;out[j+3]=o[j+3]}
+ ctx.putImageData(outImg,0,0)}
+function buildMask(l){const n=W*H,m=new Uint8Array(n),st=new Int32Array(n),p=params(l);let sp=0;
+ const ok=k=>{const dx=cx[k]-p.x,dy=cy[k]-p.y,dz=(cz[k]-p.z)*.6;return dx*dx+dy*dy+dz*dz<p.t*p.t};
+ for(const sd of l.seeds){if(m[sd])continue;m[sd]=1;st[sp++]=sd;
+  while(sp){const i=st[--sp],x=i%W;let k;
+   if(x>0){k=i-1;if(!m[k]&&ok(k)){m[k]=1;st[sp++]=k}}
+   if(x<W-1){k=i+1;if(!m[k]&&ok(k)){m[k]=1;st[sp++]=k}}
+   if(i>=W){k=i-W;if(!m[k]&&ok(k)){m[k]=1;st[sp++]=k}}
+   if(i<n-W){k=i+W;if(!m[k]&&ok(k)){m[k]=1;st[sp++]=k}}}}
+ l.mask=m}
+function buildEdges(){ex=[];ey=[];if(sel<0||!orig)return;const l=layers[sel],p=params(l),n=W*H,sm=new Uint8Array(n);
+ for(let i=0;i<n;i++){if(!p.all&&!l.mask[i])continue;const dx=cx[i]-p.x,dy=cy[i]-p.y,dz=(cz[i]-p.z)*.6,d=Math.sqrt(dx*dx+dy*dy+dz*dz);if(d>=p.t)continue;const u=(p.t-d)/(p.t*.5);if(d<=p.t*.5||u*u*(3-2*u)>.5)sm[i]=1}
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(!sm[i])continue;if(x===0||y===0||x===W-1||y===H-1||!sm[i-1]||!sm[i+1]||!sm[i-W]||!sm[i+W]){if(ex.length<400000){ex.push(x);ey.push(y)}}}}
+function prep(){for(const l of layers){if(!l.all&&(l.dirty||!l.mask))buildMask(l);if(!l.all)l.dirty=false}
+ if(outlineDirty){outlineDirty=false;buildEdges()}}
+function ants(){if(!ovImg)return;
+ if(!ex.length||hold||clean){if(drawn){u32.fill(0);octx.putImageData(ovImg,0,0);drawn=false}return}
+ u32.fill(0);const th=Math.min(6,Math.max(2,Math.round(1.5*W/(cv.clientWidth||W))));
+ for(let q=0;q<ex.length;q++){const x=ex[q],y=ex[q]===undefined?0:ey[q],c=((x+y+phase)&7)<4?0xFF000000:0xFFFFFFFF;
+  for(let a=0;a<th;a++)for(let b=0;b<th;b++){const xx=x+a,yy=y+b;if(xx<W&&yy<H)u32[yy*W+xx]=c}}
+ octx.putImageData(ovImg,0,0);drawn=true}
+function req(){cancelAnimationFrame(raf);raf=requestAnimationFrame(draw)}
+
+function sync(){
+ $('#list').innerHTML=layers.map((l,i)=>`<div class="chip ${i===sel?'on':''}" data-i="${i}"><input type="checkbox" data-t="${i}" ${l.on?'checked':''} title="Bật/tắt vùng này"><span class="sw" style="background:${hex(l.src.r,l.src.g,l.src.b)}"></span><span class="mute">→</span><span class="sw" style="background:${css(l.tgt)}"></span><span class="nm">Vùng ${i+1}</span><button data-d="${i}" title="Xóa">✕</button></div>`).join('')||'<p class="mute" style="margin:0">Chưa có vùng nào. Bấm lên ảnh để chọn màu cần đổi.</p>';
+ const box=$('#ctl');if(sel<0){box.hidden=true;return}box.hidden=false;
+ const l=layers[sel],t=l.tgt,hx=tgtHex(t);
+ $('#sH').value=t.h;$('#sS').value=t.s*100;$('#sL').value=t.l*100;$('#sE').value=l.exp;$('#sT').value=l.tol;
+ $('#vH').textContent=Math.round(t.h)+'°';$('#vS').textContent=Math.round(t.s*100)+'%';$('#vL').textContent=Math.round(t.l*100)+'%';$('#vE').textContent=l.exp;$('#vT').textContent=l.tol;
+ $('#tc').value=hx;$('#hex').value=hx;$('#srcSw').style.background=hex(l.src.r,l.src.g,l.src.b);$('#bAll').classList.toggle('on',l.all);renderPal();
+ $('#sH').style.background='linear-gradient(90deg,'+[0,60,120,180,240,300,360].map(h=>`hsl(${h} 100% 50%)`).join(',')+')';
+ $('#sS').style.background=`linear-gradient(90deg,hsl(${t.h} 0% ${t.l*100}%),hsl(${t.h} 100% ${t.l*100}%))`;
+ $('#sL').style.background=`linear-gradient(90deg,#000,hsl(${t.h} ${t.s*100}% 50%),#fff)`;
+ $('#ramp').innerHTML=[.92,.82,.72,.62,.52,.42,.32,.22,.12].map(v=>`<span data-l="${v}" style="background:hsl(${t.h} ${t.s*100}% ${v*100}%)" title="Sáng ${Math.round(v*100)}%"></span>`).join('')}
+const cur=()=>layers[sel];
+const upd=()=>{sync();req()};
+$('#sH').oninput=e=>{const t=cur().tgt;t.h=+e.target.value;if(t.s<.05)t.s=.6;upd()};
+$('#sS').oninput=e=>{cur().tgt.s=e.target.value/100;upd()};
+$('#sL').oninput=e=>{cur().tgt.l=e.target.value/100;upd()};
+$('#sE').oninput=e=>{cur().exp=+e.target.value;upd()};
+$('#sT').oninput=e=>{const l=cur();l.tol=+e.target.value;l.dirty=true;outlineDirty=true;upd()};
+function setHex(v){if(!/^#?[0-9a-f]{6}$/i.test(v))return;v=v.replace('#','');rgb2hsl(parseInt(v.slice(0,2),16),parseInt(v.slice(2,4),16),parseInt(v.slice(4,6),16));cur().tgt={h:HH,s:SS,l:LL};upd()}
+$('#tc').oninput=e=>setHex(e.target.value);
+$('#hex').onchange=e=>setHex(e.target.value);
+$('#ramp').onclick=e=>{const v=e.target.dataset.l;if(v){cur().tgt.l=+v;upd()}};
+$('#bRe').onclick=()=>setPick('re');
+$('#bAll').onclick=()=>{const l=cur();l.all=!l.all;l.dirty=true;outlineDirty=true;upd()};
+$('#bPiece').onclick=()=>setPick(pickMode==='add'?null:'add');
+$('#list').addEventListener('click',e=>{const d=e.target.dataset;
+ if(d.d!==undefined){layers.splice(+d.d,1);sel=Math.min(sel,layers.length-1);if(sel<0&&layers.length)sel=0;outlineDirty=true;sync();req();return}
+ if(d.t!==undefined)return;
+ const c=e.target.closest('.chip');if(c){sel=+c.dataset.i;outlineDirty=true;sync();req()}});
+$('#list').addEventListener('change',e=>{const i=e.target.dataset.t;if(i!==undefined){layers[+i].on=e.target.checked;req()}});
+
+$('#bUp').onclick=()=>$('#file').click();
+function renderPal(){let ok=()=>false;if(sel>=0){const t=layers[sel].tgt;hsl2rgb(t.h,t.s,t.l);const r=R,g=G,b=B;ok=c=>{const v=parseInt(c.slice(1),16);return Math.abs((v>>16)-r)<3&&Math.abs(((v>>8)&255)-g)<3&&Math.abs((v&255)-b)<3}}
+ $('#pal').innerHTML=PAL.map((c,i)=>`<div class="ps${ok(c.c)?' cur':''}" data-i="${i}" title="${c.n} ${c.c}" style="background:${c.c}"><b data-x="${i}">×</b></div>`).join('')||'<span class="mute">Bảng màu trống</span>'}
+$('#pal').onclick=e=>{const x=e.target.dataset.x;if(x!==undefined){PAL.splice(+x,1);renderPal();return}const s=e.target.closest('.ps');if(s&&sel>=0)setHex(PAL[+s.dataset.i].c)};
+$('#pAdd').onclick=()=>{const v=$('#pc').value.toLowerCase();if(!PAL.some(c=>c.c===v))PAL.push({n:'Màu mới',c:v});renderPal()};
+$('#bResult').onclick=e=>{if(!orig)return;clean=!clean;document.body.classList.toggle('clean',clean);e.currentTarget.querySelector('.lbl').textContent=clean?'Thoát xem kết quả':'Xem kết quả';if(clean)setPick(null);req();ants()};
+setInterval(()=>{if(ovImg){phase=(phase+1)&7;ants()}},140);
+$('#file').onchange=e=>readFile(e.target.files[0]);
+$('#bAdd').onclick=()=>{if(orig)setPick('new')};
+const holdOn=e=>{e.preventDefault();hold=true;req()},holdOff=()=>{if(hold){hold=false;req()}};
+$('#bHold').addEventListener('pointerdown',holdOn);addEventListener('pointerup',holdOff);addEventListener('pointercancel',holdOff);
+$('#bMask').onclick=e=>{showMask=!showMask;e.currentTarget.classList.toggle('on',showMask);req()};
+$('#bSave').onclick=()=>{if(!orig)return;const was=showMask;showMask=false;hold=false;draw();$('#outImg').src=cv.toDataURL('image/png');showMask=was;draw();$('#modal').classList.add('show')};
+$('#modal').onclick=()=>$('#modal').classList.remove('show');
+['dragover','drop'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();if(ev==='drop')readFile(e.dataTransfer.files[0])}));
+document.addEventListener('paste',e=>{const it=[...e.clipboardData.items].find(i=>i.type.startsWith('image/'));if(it)readFile(it.getAsFile())});
+</script>
+</body>
+</html>
